@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts'
 import { Indexer, Allocation, GraphNetwork, SubgraphDeployment } from '../types/schema'
 import {
   RewardsAssigned,
@@ -50,7 +50,17 @@ export function handleRewardsAssigned(event: RewardsAssigned): void {
   allocation.indexingIndexerRewards = allocation.indexingIndexerRewards.plus(indexerIndexingRewards)
   allocation.indexingDelegatorRewards = allocation.indexingDelegatorRewards.plus(
     delegatorIndexingRewards,
-  )
+  );
+
+  let delegatorRewards = delegatorIndexingRewards;
+  
+  let allocationDuration = event.params.epoch.toI32() - allocation.createdAtEpoch;
+  allocation.normalizedAPR = 
+  allocation.allocatedTokens.gt(BigInt.fromI32(0)) ? 
+  BigDecimal.fromString(delegatorRewards.toString()).div(BigDecimal.fromString(allocation.allocatedTokens.toString()))
+  .times(BigDecimal.fromString('36500')).div(BigDecimal.fromString(allocationDuration.toString()))
+  : BigDecimal.fromString('0');
+
   allocation.save()
 
   // update subgraph deployment
