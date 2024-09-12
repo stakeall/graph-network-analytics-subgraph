@@ -581,6 +581,8 @@ type Allocation @entity {
 
   "NOT IMPLEMENTED - Yearly annualzied return"
   annualizedReturn: BigDecimal!
+
+  normalizedAPR: BigDecimal
 }
 
 enum AllocationStatus {
